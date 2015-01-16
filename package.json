@@ -1,0 +1,42 @@
+{
+  "name": "nodebb-plugin-topic-ratings",
+  "version": "0.0.1",
+  "description": "A plugin that allows users to rate topics",
+  "main": "library.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/NodeBB/nodebb-plugin-topic-ratings"
+  },
+  "keywords": [
+    "nodebb",
+    "plugin",
+    "atkins",
+    "topic",
+    "ratings"
+  ],
+  "dependencies": {
+    "winston": "^0.8.1"
+  },
+  "maintainers": [
+    {
+      "name": "Andrew Rodrigues",
+      "email": "andrew@designcreateplay.com",
+      "url": "https://github.com/psychobunny"
+    },
+    {
+      "name": "Julian Lam",
+      "email": "julian@designcreateplay.com",
+      "url": "https://github.com/julianlam"
+    },
+    {
+      "name": "Barış Soner Uşaklı",
+      "email": "baris@designcreateplay.com",
+      "url": "https://github.com/barisusakli"
+    }
+  ],
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/NodeBB/nodebb-plugin-topic-ratings/issues"
+  },
+  "readmeFilename": "README.md"
+}
