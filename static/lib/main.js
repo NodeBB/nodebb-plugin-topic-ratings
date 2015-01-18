@@ -22,26 +22,18 @@ $(document).ready(function() {
 		$('.topic-ratings-stars').each(function() {
 			$(this).children().each(function(index) {
 				var icon = $(this).find('i');
-				if (index + 1 <= rating) {
-					icon.addClass('fa-star').removeClass('fa-star-o');
-				} else {
-					icon.addClass('fa-star-o').removeClass('fa-star');
-				}
+
+				icon.toggleClass('fa-star', index + 1 <= rating);
+				icon.toggleClass('fa-star-o', index + 1 > rating);
 			});
 		});
 	}
 
-	function handlerIn(ev) {
+	function handlerIn() {
 		updateRating(parseInt($(this).attr('data-rating'), 10));
 	}
 
-	function resetAll() {
-		$('.topic-ratings-stars').children().each(function(index, el) {
-			$(this).addClass('fa-star-o').removeClass('fa-star');
-		});
-	}
-
-	function handlerOut(ev) {
+	function handlerOut() {
 		updateRating(myRating);
 	}
 
@@ -57,5 +49,4 @@ $(document).ready(function() {
 		});
 		return false;
 	}
-
 });
