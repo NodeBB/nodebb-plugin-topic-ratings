@@ -33,6 +33,9 @@ plugin.addAdminNavigation = function(header, callback) {
 };
 
 plugin.getTopic = function(data, callback) {
+	if (!data || !data.topic) {
+		return callback(null, data);
+	}
 	data.topic.rating = parseInt(data.topic.rating, 10) || 1;
 	db.sortedSetScore('tid:' + data.topic.tid + ':ratings', data.uid, function(err, userRating) {
 		if (err) {
