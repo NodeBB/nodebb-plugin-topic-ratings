@@ -41,7 +41,7 @@ plugin.getTopic = function(data, callback) {
 		if (err) {
 			return callback(err);
 		}
-		data.topic.userRating = parseInt(userRating, 10) || 1;
+		data.topic.userRating = parseInt(userRating, 10) || 0;
 		callback(null, data);
 	});
 };
