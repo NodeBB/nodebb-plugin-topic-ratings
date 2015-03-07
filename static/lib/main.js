@@ -8,7 +8,7 @@ $(document).ready(function() {
 	var myRating;
 
 	$(window).on('action:ajaxify.end', function(ev, data) {
-		if (data.tpl_url === 'topic') {
+		if (app.template === 'topic') {
 			myRating = $('.topic-ratings-stars').attr('data-user-rating');
 			updateRating(myRating);
 
