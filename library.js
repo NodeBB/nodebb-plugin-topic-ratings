@@ -47,6 +47,15 @@ plugin.getTopic = function(data, callback) {
 	});
 };
 
+plugin.getTopics = function(data, callback) {
+	data.topics.forEach(function(topic) {
+		if (topic) {
+			topic.rating = parseInt(topic.rating, 10) || 1;
+		}
+	});
+	callback(null, data);
+};
+
 socketTopics.rateTopic = function(socket, data, callback) {
 	if (!socket.uid) {
 		return callback(new Error('[[error:invalid-uid]]'));
@@ -89,7 +98,25 @@ function updateTopicRating(tid, callback) {
 			}
 		});
 		var rating = totalRating / validScores;
-		db.setObjectField('topic:' + tid, 'rating', rating, callback);
+		async.parallel([
+			function (next) {
+				db.setObjectField('topic:' + tid, 'rating', rating, next);
+			},
+			function (next) {
+				db.getObjectField('topic:' + tid, 'cid', function(err, cid) {
+					if (err) {
+						return next(err);
+					}
+					if (cid) {
+						db.sortedSetAdd('cid:' + cid + ':tids:rating', rating, tid, next);
+					} else {
+						next();
+					}
+				});
+			}
+		], function(err) {
+			callback(err);
+		});
 	});
 }
 

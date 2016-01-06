@@ -3,7 +3,8 @@
 	"hooks": [
 		{ "hook": "static:app.load", "method": "init" },
 		{ "hook": "filter:admin.header.build", "method": "addAdminNavigation" },
-		{ "hook": "filter:topic.get", "method": "getTopic"}
+		{ "hook": "filter:topic.get", "method": "getTopic"},
+		{ "hook": "filter:topics.get", "method": "getTopics"}
 	],
 	"staticDirs": {
 		"static": "./static"

@@ -40,7 +40,7 @@ $(document).ready(function() {
 	function rateTopic() {
 		var rating = $(this).find('i').attr('data-rating');
 
-		socket.emit('topics.rateTopic', {tid: ajaxify.variables.get('topic_id'), rating: rating}, function(err) {
+		socket.emit('topics.rateTopic', {tid: ajaxify.data.tid, rating: rating}, function(err) {
 			if (err) {
 				return app.alertError(err.message);
 			}
