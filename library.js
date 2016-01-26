@@ -48,12 +48,30 @@ plugin.getTopic = function(data, callback) {
 };
 
 plugin.getTopics = function(data, callback) {
+	if (!data || !data.topics) {
+		return callback(null, data);
+	}
+
 	data.topics.forEach(function(topic) {
 		if (topic) {
 			topic.rating = parseInt(topic.rating, 10) || 1;
 		}
 	});
-	callback(null, data);
+
+	var keys = data.topics.map(function(topic) {
+		return 'tid:' + topic.tid + ':ratings';
+	});
+	db.sortedSetsScore(keys, data.uid, function(err, userRatings) {
+		if (err) {
+			return callback(err);
+		}
+		userRatings.forEach(function(userRating, index) {
+			if (data.topics[index]) {
+				data.topics[index].userRating = parseInt(userRating, 10) || 0;
+			}
+		});
+		callback(null, data);
+	});
 };
 
 socketTopics.rateTopic = function(socket, data, callback) {
