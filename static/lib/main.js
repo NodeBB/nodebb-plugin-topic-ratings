@@ -10,7 +10,7 @@ $(document).ready(function() {
 	$(window).on('action:topics.loaded', initTopicRatings);
 
 	function initTopicRatings(ev, data) {
-		if (app.template === 'topic' || app.template === 'category') {
+		if (app.template === 'topic' || app.template === 'category' || app.template === 'recent') {
 			var component = $('[component="topic/ratings"]');
 			if (!component.length) {
 				return;
