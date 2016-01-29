@@ -4,7 +4,8 @@
 		{ "hook": "static:app.load", "method": "init" },
 		{ "hook": "filter:admin.header.build", "method": "addAdminNavigation" },
 		{ "hook": "filter:topic.get", "method": "getTopic"},
-		{ "hook": "filter:topics.get", "method": "getTopics"}
+		{ "hook": "filter:topics.get", "method": "getTopics"},
+		{ "hook": "action:topic.save", "method": "onTopicSave"}
 	],
 	"staticDirs": {
 		"static": "./static"

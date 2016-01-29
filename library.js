@@ -74,6 +74,10 @@ plugin.getTopics = function(data, callback) {
 	});
 };
 
+plugin.onTopicSave = function(topicData) {
+	updateTopicRating(topicData.tid);
+};
+
 socketTopics.rateTopic = function(socket, data, callback) {
 	if (!socket.uid) {
 		return callback(new Error('[[error:invalid-uid]]'));
@@ -100,7 +104,10 @@ socketTopics.rateTopic = function(socket, data, callback) {
 	});
 };
 
+
+
 function updateTopicRating(tid, callback) {
+	callback = callback || function() {};
 	db.getSortedSetRangeWithScores('tid:' + tid + ':ratings', 0, -1, function(err, data) {
 		if (err) {
 			return callback(err);
@@ -115,7 +122,11 @@ function updateTopicRating(tid, callback) {
 				validScores++;
 			}
 		});
-		var rating = totalRating / validScores;
+		var rating = 0;
+		if (validScores > 0) {
+			rating = totalRating / validScores;
+		}
+
 		async.parallel([
 			function (next) {
 				db.setObjectField('topic:' + tid, 'rating', rating, next);
