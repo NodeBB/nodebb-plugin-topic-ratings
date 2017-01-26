@@ -74,8 +74,8 @@ plugin.getTopics = function(data, callback) {
 	});
 };
 
-plugin.onTopicSave = function(topicData) {
-	updateTopicRating(topicData.tid);
+plugin.onTopicSave = function(data) {
+	updateTopicRating(data.topic.tid);
 };
 
 socketTopics.rateTopic = function(socket, data, callback) {
