@@ -19,7 +19,7 @@
   },
   "nbbpm": {
     "compatibility": "^1.5.0"
-  }
+  },
   "maintainers": [
     {
       "name": "Andrew Rodrigues",
