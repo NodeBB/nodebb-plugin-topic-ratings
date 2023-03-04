@@ -10,7 +10,8 @@ $(document).ready(function() {
 	$(window).on('action:topics.loaded', initTopicRatings);
 
 	function initTopicRatings(ev, data) {
-		if (app.template === 'topic' || app.template === 'category' || app.template === 'recent') {
+		const tplsToShowOn = ['topic', 'category', 'recent', 'popular', 'top'];
+		if (tplsToShowOn.includes(ajaxify.data.template.name)) {
 			var component = $('[component="topic/ratings"]');
 			if (!component.length) {
 				return;

@@ -7,9 +7,6 @@
 		{ "hook": "filter:topics.get", "method": "getTopics"},
 		{ "hook": "action:topic.save", "method": "onTopicSave"}
 	],
-	"staticDirs": {
-		"static": "./static"
-	},
 	"scripts": [
 		"static/lib/main.js"
 	],

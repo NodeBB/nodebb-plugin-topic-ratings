@@ -14,11 +14,8 @@
     "topic",
     "ratings"
   ],
-  "dependencies": {
-    "winston": "^0.8.1"
-  },
   "nbbpm": {
-    "compatibility": "^1.5.0"
+    "compatibility": "^1.16.0"
   },
   "maintainers": [
     {
