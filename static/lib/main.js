@@ -5,8 +5,6 @@
 
 $(document).ready(function() {
 
-	$(window).on('action:ajaxify.end', initTopicRatings);
-
 	$(window).on('action:topics.loaded', initTopicRatings);
 
 	function initTopicRatings(ev, data) {
