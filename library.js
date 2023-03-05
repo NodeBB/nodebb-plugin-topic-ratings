@@ -1,12 +1,12 @@
 "use strict";
 
-var plugin = {},
-	async = module.parent.require('async'),
-	db = module.parent.require('./database'),
-	plugins = module.parent.exports,
-	socketTopics = module.parent.require('./socket.io/topics'),
 
-	settings;
+const async = require.main.require('async');
+const db = require.main.require('./src/database');
+const plugins = require.main.require('./src/plugins');
+const socketTopics = require.main.require('./src/socket.io/topics');
+
+const plugin = module.exports;
 
 plugin.init = function(params, callback) {
 	var app = params.router,
@@ -96,15 +96,13 @@ socketTopics.rateTopic = function(socket, data, callback) {
 			return callback(err);
 		}
 		updateTopicRating(data.tid, callback);
-		plugins.fireHook('action:topic.rate', {
+		plugins.hooks.fire('action:topic.rate', {
 			uid: socket.uid,
 			tid: parseInt(data.tid, 10),
 			rating: data.rating
 		});
 	});
 };
-
-
 
 function updateTopicRating(tid, callback) {
 	callback = callback || function() {};
@@ -148,6 +146,3 @@ function updateTopicRating(tid, callback) {
 		});
 	});
 }
-
-
-module.exports = plugin;

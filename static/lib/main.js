@@ -5,6 +5,7 @@
 
 $(document).ready(function() {
 
+	$(window).on('action:topic.loaded', initTopicRatings);
 	$(window).on('action:topics.loaded', initTopicRatings);
 
 	function initTopicRatings(ev, data) {
