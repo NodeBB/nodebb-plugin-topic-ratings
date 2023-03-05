@@ -51,7 +51,10 @@ $(document).ready(function() {
 
 		socket.emit('topics.rateTopic', {tid: component.attr('data-tid'), rating: rating}, function(err) {
 			if (err) {
-				return app.alertError(err.message);
+				require(['alerts'], function(alerts) {
+					alerts.error(err.message);
+				});
+				return;
 			}
 
 			component.attr('data-user-rating', rating);
