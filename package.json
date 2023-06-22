@@ -15,7 +15,7 @@
     "ratings"
   ],
   "nbbpm": {
-    "compatibility": "^1.16.0"
+    "compatibility": "^2.0.0 || ^3.0.0"
   },
   "maintainers": [
     {
@@ -34,6 +34,11 @@
       "url": "https://github.com/barisusakli"
     }
   ],
+  "devDependencies": {
+    "eslint": "8.43.0",
+    "eslint-config-nodebb": "0.2.1",
+    "eslint-plugin-import": "2.27.5"
+  },
   "license": "MIT",
   "bugs": {
     "url": "https://github.com/NodeBB/nodebb-plugin-topic-ratings/issues"

@@ -3,12 +3,13 @@
 	"hooks": [
 		{ "hook": "static:app.load", "method": "init" },
 		{ "hook": "filter:admin.header.build", "method": "addAdminNavigation" },
-		{ "hook": "filter:topic.get", "method": "getTopic"},
-		{ "hook": "filter:topics.get", "method": "getTopics"},
-		{ "hook": "action:topic.save", "method": "onTopicSave"}
+		{ "hook": "filter:topic.get", "method": "filterTopicGet"},
+		{ "hook": "filter:topics.get", "method": "filterTopicsGet"},
+		{ "hook": "action:topic.save", "method": "actionTopicSave"},
+		{ "hook": "action:topic.move", "method": "actionTopicMove"}
 	],
 	"scripts": [
 		"static/lib/main.js"
 	],
-	"templates": "static/templates"
+	"templates": "templates"
 }

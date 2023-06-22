@@ -1,148 +1,151 @@
-"use strict";
+'use strict';
 
-
-const async = require.main.require('async');
 const db = require.main.require('./src/database');
 const plugins = require.main.require('./src/plugins');
 const socketTopics = require.main.require('./src/socket.io/topics');
 
 const plugin = module.exports;
 
-plugin.init = function(params, callback) {
-	var app = params.router,
-		middleware = params.middleware,
-		controllers = params.controllers;
+const validRatings = [1, 2, 3, 4, 5];
 
-	app.get('/admin/plugins/topicratings', middleware.admin.buildHeader, renderAdmin);
-	app.get('/api/admin/plugins/topicratings', renderAdmin);
-
-	callback();
+plugin.init = async function (params) {
+	const { router } = params;
+	const routeHelpers = require.main.require('./src/routes/helpers');
+	routeHelpers.setupAdminPageRoute(router, '/admin/plugins/topicratings', (req, res) => {
+		res.render('admin/plugins/topicratings', {});
+	});
 };
 
-function renderAdmin(req, res, next) {
-	res.render('admin/plugins/topicratings', {});
-}
-
-plugin.addAdminNavigation = function(header, callback) {
+plugin.addAdminNavigation = function (header) {
 	header.plugins.push({
 		route: '/plugins/topicratings',
 		icon: 'fa-star',
-		name: 'ratings'
+		name: 'Topic Ratings',
 	});
 
-	callback(null, header);
+	return header;
 };
 
-plugin.getTopic = function(data, callback) {
-	if (!data || !data.topic) {
-		return callback(null, data);
+plugin.filterTopicGet = async function (hookData) {
+	if (!hookData || !hookData.topic) {
+		return hookData;
 	}
-	data.topic.rating = parseInt(data.topic.rating, 10) || 1;
-	db.sortedSetScore('tid:' + data.topic.tid + ':ratings', data.uid, function(err, userRating) {
-		if (err) {
-			return callback(err);
-		}
-		data.topic.userRating = parseInt(userRating, 10) || 0;
-		callback(null, data);
-	});
+	await setRatingData([hookData.topic], hookData.uid);
+	return hookData;
 };
 
-plugin.getTopics = function(data, callback) {
-	if (!data || !data.topics) {
-		return callback(null, data);
+plugin.filterTopicsGet = async function (hookData) {
+	if (!hookData || !Array.isArray(hookData.topics)) {
+		return hookData;
 	}
 
-	data.topics.forEach(function(topic) {
+	await setRatingData(hookData.topics, hookData.uid);
+	return hookData;
+};
+
+async function setRatingData(topics, uid) {
+	topics.forEach((topic) => {
 		if (topic) {
-			topic.rating = parseInt(topic.rating, 10) || 1;
+			topic.rating = parseFloat(topic.rating, 10) || 0;
+			topic.ratings = generateRatings(topic.rating);
 		}
 	});
 
-	var keys = data.topics.map(function(topic) {
-		return 'tid:' + topic.tid + ':ratings';
-	});
-	db.sortedSetsScore(keys, data.uid, function(err, userRatings) {
-		if (err) {
-			return callback(err);
+	const keys = topics.map(t => `tid:${t.tid}:ratings`);
+	const [userRatings, numRatings] = await Promise.all([
+		db.sortedSetsScore(keys, uid),
+		db.sortedSetsCard(keys),
+	]);
+	userRatings.forEach((userRating, index) => {
+		if (topics[index]) {
+			topics[index].userRating = parseInt(userRating, 10) || 0;
+			topics[index].numRatings = parseInt(numRatings[index], 10) || 0;
 		}
-		userRatings.forEach(function(userRating, index) {
-			if (data.topics[index]) {
-				data.topics[index].userRating = parseInt(userRating, 10) || 0;
-			}
-		});
-		callback(null, data);
 	});
+}
+
+function generateRatings(topicRating) {
+	function getIcon(rating) {
+		if (topicRating >= rating) {
+			return 'fa-star';
+		} else if (topicRating >= rating - 0.75 && topicRating <= rating - 0.25) {
+			return 'fa-star-half-o';
+		}
+		return 'fa-star-o';
+	}
+	return validRatings.map(rating => ({
+		value: rating,
+		icon: getIcon(rating),
+	}));
+}
+
+plugin.actionTopicSave = async function (data) {
+	await updateTopicRating(data.topic.tid);
 };
 
-plugin.onTopicSave = function(data) {
-	updateTopicRating(data.topic.tid);
-};
-
-socketTopics.rateTopic = function(socket, data, callback) {
+socketTopics.rateTopic = async function (socket, data) {
 	if (!socket.uid) {
-		return callback(new Error('[[error:invalid-uid]]'));
+		throw new Error('[[error:not-logged-in]]');
 	}
 
 	if (!parseInt(data.rating, 10) || !parseInt(data.tid, 10)) {
-		return callback(new Error('[[error:invalid-data]]'));
+		throw new Error('[[error:invalid-data]]');
 	}
 	data.rating = parseInt(data.rating, 10);
-	if ([1,2,3,4,5].indexOf(data.rating) === -1) {
-		return callback(new Error('[[error:invalid-rating]]'));
+	if (!validRatings.includes(data.rating)) {
+		throw new Error('[[error:invalid-rating]]');
 	}
 
-	db.sortedSetAdd('tid:' + data.tid + ':ratings', data.rating, socket.uid, function(err) {
-		if (err) {
-			return callback(err);
-		}
-		updateTopicRating(data.tid, callback);
-		plugins.hooks.fire('action:topic.rate', {
-			uid: socket.uid,
-			tid: parseInt(data.tid, 10),
-			rating: data.rating
-		});
+	await db.sortedSetAdd(`tid:${data.tid}:ratings`, data.rating, socket.uid);
+	const newRatingData = await updateTopicRating(data.tid);
+	plugins.hooks.fire('action:topic.rate', {
+		uid: socket.uid,
+		tid: parseInt(data.tid, 10),
+		rating: data.rating,
 	});
+	return {
+		rating: newRatingData.newRating,
+		ratings: generateRatings(newRatingData.newRating),
+		numRatings: newRatingData.numRatings,
+	};
 };
 
-function updateTopicRating(tid, callback) {
-	callback = callback || function() {};
-	db.getSortedSetRangeWithScores('tid:' + tid + ':ratings', 0, -1, function(err, data) {
-		if (err) {
-			return callback(err);
-		}
+async function updateTopicRating(tid) {
+	const data = await db.getSortedSetRangeWithScores(`tid:${tid}:ratings`, 0, -1);
 
-		var totalRating = 0;
-		var validScores = 0;
-		data.forEach(function(item) {
-			var score = parseInt(item.score, 10);
-			if (score) {
-				totalRating += score;
-				validScores++;
-			}
-		});
-		var rating = 0;
-		if (validScores > 0) {
-			rating = totalRating / validScores;
+	let totalRating = 0;
+	let validScores = 0;
+	data.forEach((item) => {
+		const score = parseInt(item.score, 10);
+		if (score) {
+			totalRating += score;
+			validScores += 1;
 		}
-
-		async.parallel([
-			function (next) {
-				db.setObjectField('topic:' + tid, 'rating', rating, next);
-			},
-			function (next) {
-				db.getObjectField('topic:' + tid, 'cid', function(err, cid) {
-					if (err) {
-						return next(err);
-					}
-					if (cid) {
-						db.sortedSetAdd('cid:' + cid + ':tids:rating', rating, tid, next);
-					} else {
-						next();
-					}
-				});
-			}
-		], function(err) {
-			callback(err);
-		});
 	});
+	let rating = 0;
+	if (validScores > 0) {
+		rating = totalRating / validScores;
+	}
+	const cid = await db.getObjectField(`topic:${tid}`, 'cid');
+	await db.setObjectField(`topic:${tid}`, 'rating', rating);
+
+	if (cid) {
+		await db.sortedSetAdd(`cid:${cid}:tids:rating`, rating, tid);
+	}
+	return {
+		newRating: rating,
+		numRatings: data.length,
+	};
 }
+
+plugin.actionTopicMove = async (hookData) => {
+	if (hookData.fromCid) {
+		await db.sortedSetRemove(`cid:${hookData.fromCid}:tids:rating`, hookData.tid);
+	}
+	if (hookData.toCid) {
+		const rating = await db.getObjectField(`topic:${hookData.tid}`, 'rating');
+		if (rating > 0) {
+			await db.sortedSetAdd(`cid:${hookData.toCid}:tids:rating`, hookData.tid);
+		}
+	}
+};
