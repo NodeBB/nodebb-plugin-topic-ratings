@@ -1,6 +1,6 @@
 {
   "name": "@nodebb/nodebb-plugin-topic-ratings",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "A plugin that allows users to rate topics",
   "main": "library.js",
   "repository": {
