@@ -11,14 +11,14 @@ const validRatings = [1, 2, 3, 4, 5];
 plugin.init = async function (params) {
 	const { router } = params;
 	const routeHelpers = require.main.require('./src/routes/helpers');
-	routeHelpers.setupAdminPageRoute(router, '/admin/plugins/topicratings', (req, res) => {
-		res.render('admin/plugins/topicratings', {});
+	routeHelpers.setupAdminPageRoute(router, '/admin/plugins/topic-ratings', (req, res) => {
+		res.render('admin/plugins/topic-ratings', {});
 	});
 };
 
 plugin.addAdminNavigation = function (header) {
 	header.plugins.push({
-		route: '/plugins/topicratings',
+		route: '/plugins/topic-ratings',
 		icon: 'fa-star',
 		name: 'Topic Ratings',
 	});
@@ -63,7 +63,7 @@ async function setRatingData(topics, uid) {
 
 function generateRatings(topicRating) {
 	function getIcon(rating) {
-		if (topicRating >= rating) {
+		if (topicRating >= rating - 0.25) {
 			return 'fa-star';
 		} else if (topicRating >= rating - 0.75 && topicRating <= rating - 0.25) {
 			return 'fa-star-half-o';
