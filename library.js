@@ -48,18 +48,15 @@ async function setRatingData(topics, uid) {
 		if (topic) {
 			topic.rating = parseFloat(topic.rating, 10) || 0;
 			topic.ratings = generateRatings(topic.rating);
+			topic.numRatings = parseInt(topic.numRatings, 10) || 0;
 		}
 	});
 
 	const keys = topics.map(t => `tid:${t.tid}:ratings`);
-	const [userRatings, numRatings] = await Promise.all([
-		db.sortedSetsScore(keys, uid),
-		db.sortedSetsCard(keys),
-	]);
+	const userRatings = await db.sortedSetsScore(keys, uid);
 	userRatings.forEach((userRating, index) => {
 		if (topics[index]) {
 			topics[index].userRating = parseInt(userRating, 10) || 0;
-			topics[index].numRatings = parseInt(numRatings[index], 10) || 0;
 		}
 	});
 }
@@ -127,7 +124,10 @@ async function updateTopicRating(tid) {
 		rating = totalRating / validScores;
 	}
 	const cid = await db.getObjectField(`topic:${tid}`, 'cid');
-	await db.setObjectField(`topic:${tid}`, 'rating', rating);
+	await db.setObject(`topic:${tid}`, {
+		rating: rating,
+		numRatings: data.length,
+	});
 
 	if (cid) {
 		await db.sortedSetAdd(`cid:${cid}:tids:rating`, rating, tid);
