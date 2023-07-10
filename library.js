@@ -46,7 +46,7 @@ plugin.filterTopicsGet = async function (hookData) {
 async function setRatingData(topics, uid) {
 	topics.forEach((topic) => {
 		if (topic) {
-			topic.rating = parseFloat(topic.rating, 10) || 0;
+			topic.rating = parseFloat(topic.rating, 10).toFixed(2) || 0;
 			topic.ratings = generateRatings(topic.rating);
 			topic.numRatings = parseInt(topic.numRatings, 10) || 0;
 		}
@@ -133,7 +133,7 @@ async function updateTopicRating(tid) {
 		await db.sortedSetAdd(`cid:${cid}:tids:rating`, rating, tid);
 	}
 	return {
-		newRating: rating,
+		newRating: rating.toFixed(2),
 		numRatings: data.length,
 	};
 }
