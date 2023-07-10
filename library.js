@@ -46,8 +46,9 @@ plugin.filterTopicsGet = async function (hookData) {
 async function setRatingData(topics, uid) {
 	topics.forEach((topic) => {
 		if (topic) {
-			topic.rating = parseFloat(topic.rating, 10).toFixed(2) || 0;
-			topic.ratings = generateRatings(topic.rating);
+			const rating = parseFloat(topic.rating || 0);
+			topic.rating = rating.toFixed(2);
+			topic.ratings = generateRatings(rating);
 			topic.numRatings = parseInt(topic.numRatings, 10) || 0;
 		}
 	});
