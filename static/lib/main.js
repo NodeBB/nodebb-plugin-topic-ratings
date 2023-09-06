@@ -29,10 +29,10 @@ $(document).ready(function () {
 			html: true,
 			animation: false,
 			placement: 'top',
-			title: function () {
-				const $this = $(this);
-				const rating = parseFloat($(this).attr('data-topic-rating')).toFixed(2);
-				const numRatings = $this.attr('data-num-ratings') || 0;
+			title: function (el) {
+				const $el = $(el);
+				const rating = parseFloat($el.attr('data-topic-rating') || 0).toFixed(2);
+				const numRatings = $el.attr('data-num-ratings') || 0;
 				return `${rating} (<i class="fa fa-user"></i> ${numRatings})`;
 			},
 		});
